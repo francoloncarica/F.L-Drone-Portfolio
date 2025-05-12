@@ -3,24 +3,25 @@ import React from 'react';
 import ImageCarousel from './ImageCarousel';
 import VideoCarousel from './VideoCarousel';
 
-// Helper function to generate dummy array of image or video items
-const generateItems = (
+interface Image {
+  src: string;
+  alt: string;
+}
+
+interface VideoItem {
+  src: string;
+  thumbnail: string;
+  title: string;
+}
+
+// Helper function to generate dummy array of image items
+const generateImageItems = (
   basePath: string, 
-  count: number, 
-  isVideo: boolean = false,
+  count: number,
   namePrefix: string = ''
-) => {
+): Image[] => {
   return Array.from({ length: count }).map((_, index) => {
     const num = index + 1;
-    
-    if (isVideo) {
-      return {
-        src: `${basePath}/${namePrefix}${num}.mp4`,
-        thumbnail: `${basePath}/${namePrefix}${num}-thumb.jpg`,
-        title: `Video ${num}`
-      };
-    }
-    
     return {
       src: `${basePath}/${namePrefix}${num}.jpg`,
       alt: `Imagen ${num}`
@@ -28,20 +29,36 @@ const generateItems = (
   });
 };
 
+// Helper function to generate dummy array of video items
+const generateVideoItems = (
+  basePath: string, 
+  count: number,
+  namePrefix: string = ''
+): VideoItem[] => {
+  return Array.from({ length: count }).map((_, index) => {
+    const num = index + 1;
+    return {
+      src: `${basePath}/${namePrefix}${num}.mp4`,
+      thumbnail: `${basePath}/${namePrefix}${num}-thumb.jpg`,
+      title: `Video ${num}`
+    };
+  });
+};
+
 const Portfolio: React.FC = () => {
   // Generate simulated image arrays
-  const panoramicImages = generateItems('/assets/panoramicas', 9);
-  const verticalImages = generateItems('/assets/verticales', 9);
-  const inmobiliariasImages = generateItems('/assets/inmobiliarias', 9);
-  const fotografiasImages = generateItems('/assets/fotos', 9);
+  const panoramicImages = generateImageItems('/assets/panoramicas', 9);
+  const verticalImages = generateImageItems('/assets/verticales', 9);
+  const inmobiliariasImages = generateImageItems('/assets/inmobiliarias', 9);
+  const fotografiasImages = generateImageItems('/assets/fotos', 9);
   
   // Generate simulated video arrays
-  const inmobiliariasVideos = generateItems('/assets/inmobiliarias/videos', 6, true, 'casa');
-  const hyperlapsesVideos = generateItems('/assets/hyperlapses', 6, true, 'video');
-  const regularVideos = generateItems('/assets/videos', 6, true, 'video');
+  const inmobiliariasVideos = generateVideoItems('/assets/inmobiliarias/videos', 6, 'casa');
+  const hyperlapsesVideos = generateVideoItems('/assets/hyperlapses', 6, 'video');
+  const regularVideos = generateVideoItems('/assets/videos', 6, 'video');
 
   return (
-    <>
+    <section id="portfolio" className="min-h-screen py-24">
       <ImageCarousel 
         title="Panorámicas" 
         images={panoramicImages}
@@ -83,7 +100,7 @@ const Portfolio: React.FC = () => {
         videos={regularVideos}
         id="videos"
       />
-    </>
+    </section>
   );
 };
 

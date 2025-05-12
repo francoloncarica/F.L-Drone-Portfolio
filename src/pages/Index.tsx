@@ -4,8 +4,8 @@ import LoadingScreen from '@/components/LoadingScreen';
 import MusicPlayer from '@/components/MusicPlayer';
 import Header from '@/components/Header';
 import IntroSection from '@/components/IntroSection';
-import ServicesSection from '@/components/ServicesSection';
 import Portfolio from '@/components/Portfolio';
+import ServicesSection from '@/components/ServicesSection';
 import Contact from '@/components/Contact';
 
 const Index: React.FC = () => {
@@ -22,7 +22,7 @@ const Index: React.FC = () => {
 
   return (
     <>
-      <LoadingScreen />
+      {!isLoaded && <LoadingScreen />}
       
       {isLoaded && (
         <>
@@ -31,8 +31,8 @@ const Index: React.FC = () => {
           <div className="min-h-screen bg-black text-white">
             <Header />
             <IntroSection />
-            <ServicesSection />
             <Portfolio />
+            <ServicesSection />
             <Contact />
           </div>
         </>
