@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
 const MusicPlayer: React.FC = () => {
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(true); // Changed to true for autoplay
   const [volume, setVolume] = useState(0.2);
   const [showVolumeControl, setShowVolumeControl] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -14,6 +14,12 @@ const MusicPlayer: React.FC = () => {
     audio.loop = true;
     audio.volume = volume;
     audioRef.current = audio;
+
+    // Try to autoplay when component mounts
+    audio.play().catch(error => {
+      console.error("Audio autoplay error:", error);
+      setPlaying(false); // If autoplay fails, update state
+    });
 
     // Clean up audio on unmount
     return () => {
@@ -38,7 +44,6 @@ const MusicPlayer: React.FC = () => {
     } else {
       audioRef.current.play().catch(error => {
         console.error("Audio playback error:", error);
-        // Often because of autoplay policies
       });
     }
     

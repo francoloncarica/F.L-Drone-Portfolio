@@ -1,8 +1,8 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
 interface VideoItem {
   src: string;
@@ -20,7 +20,42 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [titleRef, isTitleRevealed] = useScrollReveal<HTMLDivElement>();
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+  const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
+  const [videoThumbnails, setVideoThumbnails] = useState<{[key: string]: string}>({});
   const videoRefs = useRef<{[key: string]: HTMLVideoElement | null}>({});
+  const previewRefs = useRef<{[key: string]: HTMLVideoElement | null}>({});
+
+  // Generate thumbnails for videos that don't have them
+  useEffect(() => {
+    videos.forEach(video => {
+      if (video.src && !videoThumbnails[video.src]) {
+        // Create a video element to generate thumbnail
+        const videoEl = document.createElement('video');
+        videoEl.src = video.src;
+        videoEl.crossOrigin = 'anonymous';
+        videoEl.muted = true;
+        videoEl.currentTime = 1.5; // Jump to 1.5 seconds for thumbnail
+        
+        videoEl.addEventListener('loadeddata', () => {
+          // Create canvas and draw the video frame
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          if (context) {
+            canvas.width = videoEl.videoWidth;
+            canvas.height = videoEl.videoHeight;
+            context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to data URL and store it
+            const thumbnailUrl = canvas.toDataURL('image/jpeg');
+            setVideoThumbnails(prev => ({
+              ...prev,
+              [video.src]: thumbnailUrl
+            }));
+          }
+        });
+      }
+    });
+  }, [videos]);
 
   const showPrevious = () => {
     if (currentIndex > 0) {
@@ -69,6 +104,28 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         videoElement.play().catch(err => console.error("Error playing video:", err));
       }
     }, 100);
+  };
+
+  const handleVideoHover = (videoSrc: string | null) => {
+    // If hovering over a new video
+    if (videoSrc !== hoveredVideo) {
+      // Pause previous preview if exists
+      if (hoveredVideo && previewRefs.current[hoveredVideo]) {
+        previewRefs.current[hoveredVideo]?.pause();
+      }
+      
+      // Set the new hovered video
+      setHoveredVideo(videoSrc);
+      
+      // Play the new preview if exists
+      if (videoSrc && previewRefs.current[videoSrc]) {
+        const video = previewRefs.current[videoSrc];
+        if (video) {
+          video.currentTime = 0;
+          video.play().catch(err => console.error("Error playing preview:", err));
+        }
+      }
+    }
   };
 
   const visibleVideos = videos.slice(currentIndex, currentIndex + 3);
@@ -120,6 +177,9 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
             );
             
             const [videoRef, isVideoRevealed] = useScrollReveal<HTMLDivElement>();
+            const thumbnailSrc = videoThumbnails[video.src] || video.thumbnail;
+            const isActive = activeVideo === video.src;
+            const isHovered = hoveredVideo === video.src && !isActive;
             
             return (
               <div 
@@ -131,8 +191,10 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
                   "cursor-pointer group"
                 )}
                 onClick={() => handleVideoClick(video.src)}
+                onMouseEnter={() => handleVideoHover(video.src)}
+                onMouseLeave={() => handleVideoHover(null)}
               >
-                {activeVideo === video.src ? (
+                {isActive ? (
                   <video
                     ref={el => videoRefs.current[video.src] = el}
                     src={video.src}
@@ -142,11 +204,22 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
                   />
                 ) : (
                   <>
-                    <img 
-                      src={video.thumbnail} 
-                      alt={video.title} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
+                    {isHovered ? (
+                      <video
+                        ref={el => previewRefs.current[video.src] = el}
+                        src={video.src}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        playsInline
+                        muted
+                        loop
+                      />
+                    ) : (
+                      <img 
+                        src={thumbnailSrc} 
+                        alt={video.title} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-all">
                       <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-all">
                         <Play size={24} fill="white" />
