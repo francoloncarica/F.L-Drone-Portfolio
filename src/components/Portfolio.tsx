@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ImageCarousel from './ImageCarousel';
 import VideoCarousel from './VideoCarousel';
@@ -77,11 +76,13 @@ const Portfolio: React.FC = () => {
         id="inmobiliarias-fotos"
       />
       
+      {/* 
       <VideoCarousel 
         title="Inmobiliarias - Videos" 
         videos={inmobiliariasVideos}
         id="inmobiliarias-videos"
       />
+      */}
       
       <ImageCarousel 
         title="Fotos" 
