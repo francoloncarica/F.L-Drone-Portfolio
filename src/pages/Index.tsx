@@ -1,13 +1,43 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
-const Index = () => {
+import React, { useState, useEffect } from 'react';
+import LoadingScreen from '@/components/LoadingScreen';
+import MusicPlayer from '@/components/MusicPlayer';
+import Header from '@/components/Header';
+import IntroSection from '@/components/IntroSection';
+import ServicesSection from '@/components/ServicesSection';
+import Portfolio from '@/components/Portfolio';
+import Contact from '@/components/Contact';
+
+const Index: React.FC = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Simple timeout to simulate asset loading
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <LoadingScreen />
+      
+      {isLoaded && (
+        <>
+          <MusicPlayer />
+          
+          <div className="min-h-screen bg-black text-white">
+            <Header />
+            <IntroSection />
+            <ServicesSection />
+            <Portfolio />
+            <Contact />
+          </div>
+        </>
+      )}
+    </>
   );
 };
 
