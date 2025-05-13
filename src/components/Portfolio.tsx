@@ -13,48 +13,46 @@ interface VideoItem {
   title: string;
 }
 
-// Helper function to generate dummy array of image items
+// Helper function to generate array of image items
 const generateImageItems = (
-  basePath: string, 
+  basePath: string,
   count: number,
   namePrefix: string = ''
 ): Image[] => {
   return Array.from({ length: count }).map((_, index) => {
     const num = index + 1;
     return {
-      src: `${basePath}/${namePrefix}${num}.jpg`,
+      src: `./${basePath}/${namePrefix}${num}.jpg`,
       alt: `Imagen ${num}`
     };
   });
 };
 
-// Helper function to generate dummy array of video items
+// Helper function to generate array of video items
 const generateVideoItems = (
-  basePath: string, 
+  basePath: string,
   count: number,
   namePrefix: string = ''
 ): VideoItem[] => {
   return Array.from({ length: count }).map((_, index) => {
     const num = index + 1;
     return {
-      src: `${basePath}/${namePrefix}${num}.mp4`,
-      thumbnail: `${basePath}/${namePrefix}${num}-thumb.jpg`,
+      src: `./${basePath}/${namePrefix}${num}.mp4`,
+      thumbnail: `./${basePath}/${namePrefix}${num}-thumb.jpg`,
       title: `Video ${num}`
     };
   });
 };
 
 const Portfolio: React.FC = () => {
-  // Generate simulated image arrays
-  const panoramicImages = generateImageItems('/assets/panoramicas', 9);
-  const verticalImages = generateImageItems('/assets/verticales', 9);
-  const inmobiliariasImages = generateImageItems('/assets/inmobiliarias', 9);
-  const fotografiasImages = generateImageItems('/assets/fotos', 9);
-  
-  // Generate simulated video arrays
-  const inmobiliariasVideos = generateVideoItems('/assets/inmobiliarias/videos', 6, 'casa');
-  const hyperlapsesVideos = generateVideoItems('/assets/hyperlapses', 6, 'video');
-  const regularVideos = generateVideoItems('/assets/videos', 6, 'video');
+  const panoramicImages = generateImageItems('assets/panoramicas', 9);
+  const verticalImages = generateImageItems('assets/verticales', 9);
+  const inmobiliariasImages = generateImageItems('assets/inmobiliarias', 9);
+  const fotografiasImages = generateImageItems('assets/fotos', 9);
+
+  const inmobiliariasVideos = generateVideoItems('assets/inmobiliarias/videos', 6, 'casa');
+  const hyperlapsesVideos = generateVideoItems('assets/hyperlapses', 6, 'video');
+  const regularVideos = generateVideoItems('assets/videos', 6, 'video');
 
   return (
     <section id="portfolio" className="min-h-screen py-24">
@@ -63,39 +61,39 @@ const Portfolio: React.FC = () => {
         images={panoramicImages}
         id="panoramicas"
       />
-      
+
       <ImageCarousel 
         title="Verticales" 
         images={verticalImages}
         id="verticales"
       />
-      
+
       <ImageCarousel 
         title="Inmobiliarias" 
         images={inmobiliariasImages}
         id="inmobiliarias-fotos"
       />
-      
-      {/* 
+
+      {/*
       <VideoCarousel 
         title="Inmobiliarias - Videos" 
         videos={inmobiliariasVideos}
         id="inmobiliarias-videos"
       />
       */}
-      
+
       <ImageCarousel 
         title="Fotos" 
         images={fotografiasImages}
         id="fotos"
       />
-      
+
       <VideoCarousel 
         title="Hyperlapses" 
         videos={hyperlapsesVideos}
         id="hyperlapses"
       />
-      
+
       <VideoCarousel 
         title="Videos" 
         videos={regularVideos}
