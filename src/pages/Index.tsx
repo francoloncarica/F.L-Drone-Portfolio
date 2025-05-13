@@ -10,14 +10,33 @@ import Contact from '@/components/Contact';
 
 const Index: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [preloadedVideo, setPreloadedVideo] = useState<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    // Preload the background video
+    const video = document.createElement('video');
+    video.src = './assets/music/background.mp4';
+    video.preload = 'auto';
+    video.muted = true;
+    
+    // Track when video is ready to play
+    video.addEventListener('canplaythrough', () => {
+      setPreloadedVideo(video);
+    });
+    
     // Simple timeout to simulate asset loading
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 3000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (video) {
+        video.pause();
+        video.src = '';
+        video.load();
+      }
+    };
   }, []);
 
   return (

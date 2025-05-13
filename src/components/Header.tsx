@@ -24,8 +24,24 @@ const Header: React.FC = () => {
 
   return (
     <header className="relative h-screen w-full flex items-center justify-center overflow-hidden text-white">
+      {/* Background Video */}
+      <div className="absolute inset-0 w-full h-full z-0">
+        <video 
+          className="absolute top-0 left-0 min-h-full min-w-full object-cover"
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          poster="./assets/panoramicas/1.jpg"
+        >
+          <source src="./assets/music/background.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay for better text visibility */}
+        <div className="absolute inset-0 bg-black/50"></div>
+      </div>
+      
       {/* Abstract animation background */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden z-10">
         {particles.map(particle => (
           <div
             key={particle.id}
@@ -45,7 +61,7 @@ const Header: React.FC = () => {
         <div className="absolute w-px h-1/2 bg-gradient-to-b from-transparent via-white/15 to-transparent bottom-0 left-1/3 animate-particle-move" style={{ animationDelay: '0.7s' }}></div>
       </div>
       
-      <div className="z-10 text-center px-4 animate-float-in">
+      <div className="z-20 text-center px-4 animate-float-in">
         <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">F.L Portfolio</h1>
         <p className="text-xl md:text-2xl max-w-2xl mx-auto font-light text-white/80">
           Capturando perspectivas únicas: Fotografía y videografía con drones
@@ -55,6 +71,13 @@ const Header: React.FC = () => {
           <a 
             href="#introduccion" 
             className="inline-flex items-center border border-white/30 px-6 py-3 rounded-full hover:bg-white/10 transition-all"
+            onClick={(e) => {
+              e.preventDefault();
+              const section = document.getElementById('introduccion');
+              if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
           >
             Descubrir
             <svg 

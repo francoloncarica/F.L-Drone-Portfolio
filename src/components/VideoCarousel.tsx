@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
@@ -24,6 +25,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   const [videoThumbnails, setVideoThumbnails] = useState<{[key: string]: string}>({});
   const videoRefs = useRef<{[key: string]: HTMLVideoElement | null}>({});
   const previewRefs = useRef<{[key: string]: HTMLVideoElement | null}>({});
+  const isMobile = useIsMobile();
 
   // Generate thumbnails for videos that don't have them
   useEffect(() => {
@@ -57,18 +59,21 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
     });
   }, [videos]);
 
+  // Number of videos to show per page (1 on mobile, 3 on desktop)
+  const videosPerPage = isMobile ? 1 : 3;
+
   const showPrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 3);
+      setCurrentIndex(currentIndex - videosPerPage);
     } else {
       // Loop to the end
-      setCurrentIndex(Math.floor((videos.length - 1) / 3) * 3);
+      setCurrentIndex(Math.floor((videos.length - 1) / videosPerPage) * videosPerPage);
     }
   };
 
   const showNext = () => {
-    if (currentIndex + 3 < videos.length) {
-      setCurrentIndex(currentIndex + 3);
+    if (currentIndex + videosPerPage < videos.length) {
+      setCurrentIndex(currentIndex + videosPerPage);
     } else {
       // Loop to the beginning
       setCurrentIndex(0);
@@ -107,6 +112,9 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   };
 
   const handleVideoHover = (videoSrc: string | null) => {
+    // Skip preview on mobile
+    if (isMobile) return;
+    
     // If hovering over a new video
     if (videoSrc !== hoveredVideo) {
       // Pause previous preview if exists
@@ -128,11 +136,14 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
     }
   };
 
-  const visibleVideos = videos.slice(currentIndex, currentIndex + 3);
-  // Pad with empty slots if needed to maintain 3 items
-  while (visibleVideos.length < 3) {
+  const visibleVideos = videos.slice(currentIndex, currentIndex + videosPerPage);
+  // Pad with empty slots if needed to maintain consistent number of items
+  while (visibleVideos.length < videosPerPage) {
     visibleVideos.push({ src: "", thumbnail: "", title: "" });
   }
+
+  // Determine grid columns based on device type
+  const gridColumns = isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3";
 
   return (
     <section id={id} className="portfolio-section">
@@ -170,7 +181,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         </div>
         
         {/* Carousel Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-12">
+        <div className={`grid ${gridColumns} gap-4 px-12`}>
           {visibleVideos.map((video, index) => {
             if (!video.src) return (
               <div key={index} className="aspect-w-16 aspect-h-10 bg-black/20 rounded-md"></div>
@@ -179,7 +190,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
             const [videoRef, isVideoRevealed] = useScrollReveal<HTMLDivElement>();
             const thumbnailSrc = videoThumbnails[video.src] || video.thumbnail;
             const isActive = activeVideo === video.src;
-            const isHovered = hoveredVideo === video.src && !isActive;
+            const isHovered = hoveredVideo === video.src && !isActive && !isMobile;
             
             return (
               <div 
@@ -234,14 +245,14 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         
         {/* Carousel Indicators */}
         <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: Math.ceil(videos.length / 3) }).map((_, idx) => (
+          {Array.from({ length: Math.ceil(videos.length / videosPerPage) }).map((_, idx) => (
             <button
               key={idx}
               className={cn(
                 "w-2 h-2 rounded-full transition-all",
-                currentIndex / 3 === idx ? "bg-white" : "bg-white/30"
+                currentIndex / videosPerPage === idx ? "bg-white" : "bg-white/30"
               )}
-              onClick={() => setCurrentIndex(idx * 3)}
+              onClick={() => setCurrentIndex(idx * videosPerPage)}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
