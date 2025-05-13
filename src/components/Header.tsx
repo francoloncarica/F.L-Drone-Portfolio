@@ -1,8 +1,13 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  preloadedVideo?: HTMLVideoElement | null;
+}
+
+const Header: React.FC<HeaderProps> = ({ preloadedVideo }) => {
   const [particles, setParticles] = useState<{ id: number, x: number, y: number, size: number, delay: number }[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Generate random particles for background animation
@@ -20,13 +25,26 @@ const Header: React.FC = () => {
     }
     
     setParticles(newParticles);
-  }, []);
+
+    // If we have a preloaded video, copy its state to our video element
+    if (preloadedVideo && videoRef.current) {
+      // Make sure the video plays immediately when component mounts
+      videoRef.current.play().catch(e => {
+        console.log('Video autoplay was prevented by browser', e);
+        // Try again with user interaction
+        document.addEventListener('click', () => {
+          videoRef.current?.play();
+        }, { once: true });
+      });
+    }
+  }, [preloadedVideo]);
 
   return (
     <header className="relative h-screen w-full flex items-center justify-center overflow-hidden text-white">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0">
         <video 
+          ref={videoRef}
           className="absolute top-0 left-0 min-h-full min-w-full object-cover"
           autoPlay 
           muted 

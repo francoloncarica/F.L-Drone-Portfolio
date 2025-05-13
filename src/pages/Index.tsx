@@ -48,7 +48,7 @@ const Index: React.FC = () => {
           <MusicPlayer />
           
           <div className="min-h-screen bg-black text-white">
-            <Header />
+            <Header preloadedVideo={preloadedVideo} />
             <IntroSection />
             <Portfolio />
             <ServicesSection />
