@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
 interface VideoItem {
   src: string;
@@ -30,7 +30,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   // Generate thumbnails for videos that don't have them
   useEffect(() => {
     videos.forEach(video => {
-      if (video.src && !videoThumbnails[video.src] && !video.thumbnail) {
+      if (video.src && !videoThumbnails[video.src]) {
         // Create a video element to generate thumbnail
         const videoEl = document.createElement('video');
         videoEl.src = video.src;
@@ -39,29 +39,25 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         videoEl.currentTime = 1.5; // Jump to 1.5 seconds for thumbnail
         
         videoEl.addEventListener('loadeddata', () => {
-          try {
-            // Create canvas and draw the video frame
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            if (context) {
-              canvas.width = videoEl.videoWidth;
-              canvas.height = videoEl.videoHeight;
-              context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-              
-              // Convert canvas to data URL and store it
-              const thumbnailUrl = canvas.toDataURL('image/jpeg');
-              setVideoThumbnails(prev => ({
-                ...prev,
-                [video.src]: thumbnailUrl
-              }));
-            }
-          } catch (error) {
-            console.error("Error generating thumbnail:", error);
+          // Create canvas and draw the video frame
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          if (context) {
+            canvas.width = videoEl.videoWidth;
+            canvas.height = videoEl.videoHeight;
+            context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to data URL and store it
+            const thumbnailUrl = canvas.toDataURL('image/jpeg');
+            setVideoThumbnails(prev => ({
+              ...prev,
+              [video.src]: thumbnailUrl
+            }));
           }
         });
       }
     });
-  }, [videos, videoThumbnails]);
+  }, [videos]);
 
   // Number of videos to show per page (1 on mobile, 3 on desktop)
   const videosPerPage = isMobile ? 1 : 3;
@@ -85,12 +81,12 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   };
 
   const handleVideoClick = (videoSrc: string) => {
-    // If clicking the active video, toggle play/pause
+    // If clicking the active video, pause it
     if (activeVideo === videoSrc) {
       const videoElement = videoRefs.current[videoSrc];
       if (videoElement) {
         if (videoElement.paused) {
-          videoElement.play().catch(err => console.error("Error playing video:", err));
+          videoElement.play();
         } else {
           videoElement.pause();
         }
@@ -123,8 +119,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
     if (videoSrc !== hoveredVideo) {
       // Pause previous preview if exists
       if (hoveredVideo && previewRefs.current[hoveredVideo]) {
-        const prevVideo = previewRefs.current[hoveredVideo];
-        if (prevVideo) prevVideo.pause();
+        previewRefs.current[hoveredVideo]?.pause();
       }
       
       // Set the new hovered video
@@ -141,7 +136,6 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
     }
   };
 
-  // Get visible videos based on current index
   const visibleVideos = videos.slice(currentIndex, currentIndex + videosPerPage);
   // Pad with empty slots if needed to maintain consistent number of items
   while (visibleVideos.length < videosPerPage) {
@@ -190,17 +184,17 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         <div className={`grid ${gridColumns} gap-4 px-12`}>
           {visibleVideos.map((video, index) => {
             if (!video.src) return (
-              <div key={`empty-${index}`} className="aspect-w-16 aspect-h-10 bg-black/20 rounded-md"></div>
+              <div key={index} className="aspect-w-16 aspect-h-10 bg-black/20 rounded-md"></div>
             );
             
             const [videoRef, isVideoRevealed] = useScrollReveal<HTMLDivElement>();
-            const thumbnailSrc = video.thumbnail || videoThumbnails[video.src];
+            const thumbnailSrc = videoThumbnails[video.src] || video.thumbnail;
             const isActive = activeVideo === video.src;
             const isHovered = hoveredVideo === video.src && !isActive && !isMobile;
             
             return (
               <div 
-                key={`video-${video.src}-${index}`}
+                key={index}
                 ref={videoRef}
                 className={cn(
                   "relative aspect-w-16 aspect-h-10 overflow-hidden rounded-md transition-all duration-1000 transform filter grayscale opacity-80",
@@ -232,8 +226,8 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
                       />
                     ) : (
                       <img 
-                        src={thumbnailSrc || `${video.src}#t=1.5`} 
-                        alt={video.title || "Video thumbnail"}
+                        src={thumbnailSrc} 
+                        alt={video.title} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     )}
@@ -253,7 +247,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         <div className="flex justify-center mt-8 space-x-2">
           {Array.from({ length: Math.ceil(videos.length / videosPerPage) }).map((_, idx) => (
             <button
-              key={`indicator-${idx}`}
+              key={idx}
               className={cn(
                 "w-2 h-2 rounded-full transition-all",
                 currentIndex / videosPerPage === idx ? "bg-white" : "bg-white/30"

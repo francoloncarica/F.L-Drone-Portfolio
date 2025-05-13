@@ -1,13 +1,8 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
-interface HeaderProps {
-  preloadedVideo?: HTMLVideoElement | null;
-}
-
-const Header: React.FC<HeaderProps> = ({ preloadedVideo }) => {
+const Header: React.FC = () => {
   const [particles, setParticles] = useState<{ id: number, x: number, y: number, size: number, delay: number }[]>([]);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Generate random particles for background animation
@@ -25,26 +20,13 @@ const Header: React.FC<HeaderProps> = ({ preloadedVideo }) => {
     }
     
     setParticles(newParticles);
-
-    // If we have a preloaded video, copy its state to our video element
-    if (preloadedVideo && videoRef.current) {
-      // Make sure the video plays immediately when component mounts
-      videoRef.current.play().catch(e => {
-        console.log('Video autoplay was prevented by browser', e);
-        // Try again with user interaction
-        document.addEventListener('click', () => {
-          videoRef.current?.play();
-        }, { once: true });
-      });
-    }
-  }, [preloadedVideo]);
+  }, []);
 
   return (
     <header className="relative h-screen w-full flex items-center justify-center overflow-hidden text-white">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0">
         <video 
-          ref={videoRef}
           className="absolute top-0 left-0 min-h-full min-w-full object-cover"
           autoPlay 
           muted 
@@ -52,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ preloadedVideo }) => {
           playsInline
           poster="./assets/panoramicas/1.jpg"
         >
-          <source src="./assets/videos/video1.mp4" type="video/mp4" />
+          <source src="./assets/music/background.mp4" type="video/mp4" />
         </video>
         {/* Dark overlay for better text visibility */}
         <div className="absolute inset-0 bg-black/50"></div>
