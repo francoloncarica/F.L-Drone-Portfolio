@@ -45,7 +45,7 @@ const generateVideoItems = (
 };
 
 const Portfolio: React.FC = () => {
-  const panoramicImages = generateImageItems('assets/panoramicas', 9);
+  const panoramicImages = generateImageItems('assets/panoramicas', 12);
   const verticalImages = generateImageItems('assets/verticales', 9);
   const inmobiliariasImages = generateImageItems('assets/inmobiliarias', 9);
   const fotografiasImages = generateImageItems('assets/fotos', 9);

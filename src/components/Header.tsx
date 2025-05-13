@@ -32,9 +32,8 @@ const Header: React.FC = () => {
           muted 
           loop 
           playsInline
-          poster="./assets/panoramicas/1.jpg"
         >
-          <source src="./assets/music/background.mp4" type="video/mp4" />
+          <source src="./assets/videos/video2.mp4" type="video/mp4" />
         </video>
         {/* Dark overlay for better text visibility */}
         <div className="absolute inset-0 bg-black/50"></div>
