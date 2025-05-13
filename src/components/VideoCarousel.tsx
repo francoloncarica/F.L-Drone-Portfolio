@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 interface VideoItem {
   src: string;
@@ -123,7 +123,8 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
     if (videoSrc !== hoveredVideo) {
       // Pause previous preview if exists
       if (hoveredVideo && previewRefs.current[hoveredVideo]) {
-        previewRefs.current[hoveredVideo]?.pause();
+        const prevVideo = previewRefs.current[hoveredVideo];
+        if (prevVideo) prevVideo.pause();
       }
       
       // Set the new hovered video
@@ -140,6 +141,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
     }
   };
 
+  // Get visible videos based on current index
   const visibleVideos = videos.slice(currentIndex, currentIndex + videosPerPage);
   // Pad with empty slots if needed to maintain consistent number of items
   while (visibleVideos.length < videosPerPage) {
@@ -188,7 +190,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         <div className={`grid ${gridColumns} gap-4 px-12`}>
           {visibleVideos.map((video, index) => {
             if (!video.src) return (
-              <div key={index} className="aspect-w-16 aspect-h-10 bg-black/20 rounded-md"></div>
+              <div key={`empty-${index}`} className="aspect-w-16 aspect-h-10 bg-black/20 rounded-md"></div>
             );
             
             const [videoRef, isVideoRevealed] = useScrollReveal<HTMLDivElement>();
@@ -198,7 +200,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
             
             return (
               <div 
-                key={index}
+                key={`video-${video.src}-${index}`}
                 ref={videoRef}
                 className={cn(
                   "relative aspect-w-16 aspect-h-10 overflow-hidden rounded-md transition-all duration-1000 transform filter grayscale opacity-80",
@@ -231,7 +233,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
                     ) : (
                       <img 
                         src={thumbnailSrc || `${video.src}#t=1.5`} 
-                        alt={video.title} 
+                        alt={video.title || "Video thumbnail"}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     )}
@@ -251,7 +253,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         <div className="flex justify-center mt-8 space-x-2">
           {Array.from({ length: Math.ceil(videos.length / videosPerPage) }).map((_, idx) => (
             <button
-              key={idx}
+              key={`indicator-${idx}`}
               className={cn(
                 "w-2 h-2 rounded-full transition-all",
                 currentIndex / videosPerPage === idx ? "bg-white" : "bg-white/30"
