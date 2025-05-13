@@ -10,7 +10,7 @@ const MusicPlayer: React.FC = () => {
 
   useEffect(() => {
     // Create audio element
-    const audio = new Audio('/assets/music/background.mp4');
+    const audio = new Audio('./assets/music/background.mp4');
     audio.loop = true;
     audio.volume = volume;
     audioRef.current = audio;
