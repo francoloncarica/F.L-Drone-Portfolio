@@ -30,7 +30,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   // Generate thumbnails for videos that don't have them
   useEffect(() => {
     videos.forEach(video => {
-      if (video.src && !videoThumbnails[video.src]) {
+      if (video.src && !videoThumbnails[video.src] && !video.thumbnail) {
         // Create a video element to generate thumbnail
         const videoEl = document.createElement('video');
         videoEl.src = video.src;
@@ -39,25 +39,29 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
         videoEl.currentTime = 1.5; // Jump to 1.5 seconds for thumbnail
         
         videoEl.addEventListener('loadeddata', () => {
-          // Create canvas and draw the video frame
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          if (context) {
-            canvas.width = videoEl.videoWidth;
-            canvas.height = videoEl.videoHeight;
-            context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-            
-            // Convert canvas to data URL and store it
-            const thumbnailUrl = canvas.toDataURL('image/jpeg');
-            setVideoThumbnails(prev => ({
-              ...prev,
-              [video.src]: thumbnailUrl
-            }));
+          try {
+            // Create canvas and draw the video frame
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            if (context) {
+              canvas.width = videoEl.videoWidth;
+              canvas.height = videoEl.videoHeight;
+              context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+              
+              // Convert canvas to data URL and store it
+              const thumbnailUrl = canvas.toDataURL('image/jpeg');
+              setVideoThumbnails(prev => ({
+                ...prev,
+                [video.src]: thumbnailUrl
+              }));
+            }
+          } catch (error) {
+            console.error("Error generating thumbnail:", error);
           }
         });
       }
     });
-  }, [videos]);
+  }, [videos, videoThumbnails]);
 
   // Number of videos to show per page (1 on mobile, 3 on desktop)
   const videosPerPage = isMobile ? 1 : 3;
@@ -81,12 +85,12 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
   };
 
   const handleVideoClick = (videoSrc: string) => {
-    // If clicking the active video, pause it
+    // If clicking the active video, toggle play/pause
     if (activeVideo === videoSrc) {
       const videoElement = videoRefs.current[videoSrc];
       if (videoElement) {
         if (videoElement.paused) {
-          videoElement.play();
+          videoElement.play().catch(err => console.error("Error playing video:", err));
         } else {
           videoElement.pause();
         }
@@ -188,7 +192,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
             );
             
             const [videoRef, isVideoRevealed] = useScrollReveal<HTMLDivElement>();
-            const thumbnailSrc = videoThumbnails[video.src] || video.thumbnail;
+            const thumbnailSrc = video.thumbnail || videoThumbnails[video.src];
             const isActive = activeVideo === video.src;
             const isHovered = hoveredVideo === video.src && !isActive && !isMobile;
             
@@ -226,7 +230,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ title, videos, id }) => {
                       />
                     ) : (
                       <img 
-                        src={thumbnailSrc} 
+                        src={thumbnailSrc || `${video.src}#t=1.5`} 
                         alt={video.title} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
