@@ -21,7 +21,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ title, images, id }) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   
   // Configure the number of images to show based on the carousel ID
-  const imagesPerView = id === 'panoramicas' ? 4 : id === 'verticales' ? 3 : 4;
+  const imagesPerView = id === 'panoramicas' ? 4 : id === 'verticales' || id === 'fotos' ? 3 : 3;
 
   const showPrevious = () => {
     if (currentIndex > 0) {
